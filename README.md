@@ -58,6 +58,9 @@ openclaw plugins update feishu
 | `docx:document:readonly` | `feishu_doc` | Read documents |
 | `drive:drive:readonly` | `feishu_drive` | List folders, get file info |
 | `wiki:wiki:readonly` | `feishu_wiki` | List spaces, list nodes, get node info, search |
+| `bitable:app:readonly` | `feishu_bitable` | List tables, read records |
+| `calendar:calendar:readonly` | `feishu_calendar` | List calendars, read events |
+| `minutes:minutes:readonly` | `feishu_minutes` | Read meeting minutes (⚠️ API limited - see notes below) |
 
 **Read-write** (optional, for create/edit/delete operations):
 
@@ -67,6 +70,8 @@ openclaw plugins update feishu
 | `docx:document.block:convert` | `feishu_doc` | Markdown to blocks conversion (required for write/append) |
 | `drive:drive` | `feishu_doc`, `feishu_drive` | Upload images to documents, create folders, move/delete files |
 | `wiki:wiki` | `feishu_wiki` | Create/move/rename wiki nodes |
+| `bitable:app` | `feishu_bitable` | Create tables, add/update/delete records |
+| `calendar:calendar` | `feishu_calendar` | Create/update/delete events, manage attendees |
 
 #### Drive Access ⚠️
 
@@ -91,6 +96,32 @@ Without this step, `feishu_drive` operations like `create_folder` will fail beca
 Without this step, `feishu_wiki` will return empty results even with correct API permissions.
 
 Reference: [Wiki FAQ - How to add app to wiki](https://open.feishu.cn/document/server-docs/docs/wiki-v2/wiki-qa#a40ad4ca)
+
+#### Bitable (Multidimensional Table) Access ⚠️
+
+> **Important:** Bitable API works with **Base** tables, not Wiki tables.
+
+When creating a multidimensional table in Feishu:
+- **Base tables** (独立多维表格) - ✅ Supported by API
+- **Wiki tables** (知识库中的多维表格) - ❌ Not accessible via API
+
+To use `feishu_bitable`:
+1. Create a **Base** table (not in wiki)
+2. Share it with the bot (if needed)
+3. Extract the app_id from the URL: `https://xxx.feishu.cn/base/{app_id}`
+
+#### Minutes API Limitation ⚠️
+
+> **Important:** Minutes API has severe limitations and may not work even with permissions granted.
+
+Known issues:
+- Permission may show as "granted" but not actually take effect
+- API returns 403 even with correct permissions
+- Likely requires special approval or enterprise features
+
+**Recommended alternative**: Use `feishu_doc` tool to access minutes content (minutes are stored as documents).
+
+For details, see: [MINUTES-API-LIMITATION.md](./MINUTES-API-LIMITATION.md)
 
 #### Event Subscriptions ⚠️
 
@@ -162,6 +193,9 @@ channels:
 - **Document tools**: Read, create, and write Feishu documents with markdown (tables not supported due to API limitations)
 - **Wiki tools**: Navigate knowledge bases, list spaces, get node details, search, create/move/rename nodes
 - **Drive tools**: List folders, get file info, create folders, move/delete files
+- **Bitable tools**: Manage multidimensional tables - create tables/fields, query/search records, batch operations (up to 500 records)
+- **Calendar tools**: Manage calendars and events - list/create/update events, add attendees, set reminders, check availability
+- **Minutes tools**: View meeting minutes metadata (⚠️ API limitations apply - content access via document tools recommended)
 - **@mention forwarding**: When you @mention someone in your message, the bot's reply will automatically @mention them too
 - **Permission error notification**: When the bot encounters a Feishu API permission error, it automatically notifies the user with the permission grant URL
 
@@ -268,6 +302,9 @@ openclaw plugins update feishu
 | `docx:document:readonly` | `feishu_doc` | 读取文档 |
 | `drive:drive:readonly` | `feishu_drive` | 列出文件夹、获取文件信息 |
 | `wiki:wiki:readonly` | `feishu_wiki` | 列出空间、列出节点、获取节点详情、搜索 |
+| `bitable:app:readonly` | `feishu_bitable` | 列出数据表、读取记录 |
+| `calendar:calendar:readonly` | `feishu_calendar` | 列出日历、读取日程 |
+| `minutes:minutes:readonly` | `feishu_minutes` | 读取会议妙记（⚠️ API 功能受限 - 见下方说明） |
 
 **读写权限**（可选，用于创建/编辑/删除操作）：
 
@@ -277,6 +314,8 @@ openclaw plugins update feishu
 | `docx:document.block:convert` | `feishu_doc` | Markdown 转 blocks（write/append 必需） |
 | `drive:drive` | `feishu_doc`, `feishu_drive` | 上传图片到文档、创建文件夹、移动/删除文件 |
 | `wiki:wiki` | `feishu_wiki` | 创建/移动/重命名知识库节点 |
+| `bitable:app` | `feishu_bitable` | 创建数据表、添加/更新/删除记录 |
+| `calendar:calendar` | `feishu_calendar` | 创建/更新/删除日程、管理参会人 |
 
 #### 云空间访问权限 ⚠️
 
@@ -301,6 +340,32 @@ openclaw plugins update feishu
 如果不做这一步，即使 API 权限正确，`feishu_wiki` 也会返回空结果。
 
 参考文档：[知识库常见问题 - 如何将应用添加为知识库成员](https://open.feishu.cn/document/server-docs/docs/wiki-v2/wiki-qa#a40ad4ca)
+
+#### 多维表格访问权限 ⚠️
+
+> **重要：** 多维表格 API 仅支持 **Base 表格**，不支持知识库中的表格。
+
+在飞书中创建多维表格时：
+- **Base 表格**（独立多维表格）- ✅ API 支持
+- **Wiki 表格**（知识库中的表格）- ❌ API 不支持
+
+使用 `feishu_bitable` 工具：
+1. 创建 **Base 表格**（不要在知识库中创建）
+2. 必要时将表格分享给机器人
+3. 从 URL 提取 app_id: `https://xxx.feishu.cn/base/{app_id}`
+
+#### 妙记 API 限制 ⚠️
+
+> **重要：** 妙记 API 功能严重受限，即使申请权限也可能无法使用。
+
+已知问题：
+- 权限界面显示"已开通"但实际未生效
+- 即使权限正确也返回 403 错误
+- 可能需要特殊申请或企业版功能
+
+**推荐替代方案**：使用 `feishu_doc` 工具访问妙记内容（妙记以文档形式存储）。
+
+详细说明见：[MINUTES-API-LIMITATION.md](./MINUTES-API-LIMITATION.md)
 
 #### 事件订阅 ⚠️
 
@@ -372,7 +437,10 @@ channels:
 - **文档工具**：读取、创建、用 Markdown 写入飞书文档（表格因 API 限制不支持）
 - **知识库工具**：浏览知识库、列出空间、获取节点详情、搜索、创建/移动/重命名节点
 - **云空间工具**：列出文件夹、获取文件信息、创建文件夹、移动/删除文件
-- **@ 转发功能**：在消息中 @ 某人，机器人的回复会自动 @ 该用户
+- **多维表格工具**：管理多维表格 - 创建表格/字段、查询/搜索记录、批量操作（最多 500 条）
+- **日历工具**：管理日历和日程 - 列出/创建/更新日程、添加参会人、设置提醒、查询忙闲
+- **妙记工具**：查看会议妙记元信息（⚠️ API 功能受限 - 建议通过文档工具访问内容）
+- **@ 转发功能**：在消息中 @ 某人,机器人的回复会自动 @ 该用户
 - **权限错误提示**：当机器人遇到飞书 API 权限错误时，会自动通知用户并提供权限授权链接
 
 #### @ 转发功能

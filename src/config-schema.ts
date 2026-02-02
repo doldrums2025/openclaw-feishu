@@ -65,6 +65,8 @@ const FeishuToolsConfigSchema = z
     drive: z.boolean().optional(), // Cloud storage operations (default: true)
     perm: z.boolean().optional(), // Permission management (default: false, sensitive)
     scopes: z.boolean().optional(), // App scopes diagnostic (default: true)
+    bitable: z.boolean().optional(), // Bitable/multidimensional table operations (default: true)
+    calendar: z.boolean().optional(), // Calendar/event operations (default: true)
   })
   .strict()
   .optional();
